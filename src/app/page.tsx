@@ -20,9 +20,7 @@ const Home = () => {
     []
   );
   const [page, setPage] = useState(1);
-  const [favorites, setFavorites] = useState<string[] | null>(
-    () => JSON.parse(localStorage.getItem("favorites") as string) || []
-  );
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,14 +31,24 @@ const Home = () => {
   }, [page]);
 
   useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    if (typeof window !== "undefined") {
+      const storedFavorites =
+        JSON.parse(localStorage.getItem("favorites") as string) || [];
+      setFavorites(storedFavorites);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    }
   }, [favorites]);
 
   const toggleFavorite = (character: { name: string }) => {
-    if (favorites?.includes(character.name)) {
+    if (favorites.includes(character.name)) {
       setFavorites(favorites.filter((fav) => fav !== character.name));
     } else {
-      setFavorites([...(favorites as string[]), character.name]);
+      setFavorites([...favorites, character.name]);
     }
   };
 
@@ -85,11 +93,11 @@ const Home = () => {
                       <Button
                         mr={2}
                         colorScheme={
-                          favorites?.includes(character.name) ? "red" : "teal"
+                          favorites.includes(character.name) ? "red" : "teal"
                         }
                         onClick={() => toggleFavorite(character)}
                       >
-                        {favorites?.includes(character.name)
+                        {favorites.includes(character.name)
                           ? "Unfavorite"
                           : "Favorite"}
                       </Button>
