@@ -16,9 +16,9 @@ import { useRouter } from "next/navigation";
 
 const Home = () => {
   const router = useRouter();
-  const [characters, setCharacters] = useState<{ name: string; url: string }[]>(
-    []
-  );
+  const [characters, setCharacters] = useState<
+    { name: string; url: string; id: string }[]
+  >([]);
   const [page, setPage] = useState(1);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +31,14 @@ const Home = () => {
   }, [page]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedFavorites =
-        JSON.parse(localStorage.getItem("favorites") as string) || [];
+    if (
+      typeof window !== "undefined" &&
+      JSON.parse(localStorage.getItem("favorites") as string).length
+    ) {
+      const storedFavorites = JSON.parse(
+        localStorage.getItem("favorites") as string
+      );
+
       setFavorites(storedFavorites);
     }
   }, []);
@@ -44,11 +49,13 @@ const Home = () => {
     }
   }, [favorites]);
 
-  const toggleFavorite = (character: { name: string }) => {
-    if (favorites.includes(character.name)) {
-      setFavorites(favorites.filter((fav) => fav !== character.name));
+  const toggleFavorite = (character: { name: string; url: string }) => {
+    const id = character.url.split("/")[5];
+
+    if (favorites.includes(id)) {
+      setFavorites(favorites.filter((fav) => fav !== id));
     } else {
-      setFavorites([...favorites, character.name]);
+      setFavorites([...favorites, id]);
     }
   };
 
@@ -67,6 +74,13 @@ const Home = () => {
           </Center>
         ) : (
           <>
+            <Button
+              colorScheme="yellow"
+              marginBottom={2}
+              onClick={() => router.push("/favorites")}
+            >
+              See All Favorites
+            </Button>
             <SimpleGrid columns={[1, 2, 3, 4]} spacing={4}>
               {characters.map((character) => (
                 <Box
@@ -93,11 +107,13 @@ const Home = () => {
                       <Button
                         mr={2}
                         colorScheme={
-                          favorites.includes(character.name) ? "red" : "teal"
+                          favorites.includes(character.url.split("/")[5])
+                            ? "red"
+                            : "teal"
                         }
                         onClick={() => toggleFavorite(character)}
                       >
-                        {favorites.includes(character.name)
+                        {favorites.includes(character.url.split("/")[5])
                           ? "Unfavorite"
                           : "Favorite"}
                       </Button>
