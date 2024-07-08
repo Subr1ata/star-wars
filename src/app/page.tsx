@@ -33,6 +33,7 @@ const Home = () => {
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
+      JSON.parse(localStorage.getItem("favorites") as string) &&
       JSON.parse(localStorage.getItem("favorites") as string).length
     ) {
       const storedFavorites = JSON.parse(
